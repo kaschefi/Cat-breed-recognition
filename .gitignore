@@ -1,0 +1,4 @@
+/images
+.python-version
+pyproject.toml
+uv.lock
