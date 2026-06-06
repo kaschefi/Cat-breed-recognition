@@ -8,7 +8,6 @@ from torchvision import datasets, transforms
 import timm
 from tqdm import tqdm
 
-# --- NEW IMPORTS FOR PLOTTING & METRICS ---
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -132,7 +131,7 @@ def main():
     DATA_DIR = "images/structured"
     NUM_CLASSES = 12
     BATCH_SIZE = 32
-    EPOCHS = 10
+    EPOCHS = 5
     LEARNING_RATE = 1e-4
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     MODEL_NAME = 'efficientnet_b0'
