@@ -13,6 +13,10 @@ import seaborn as sns
 import numpy as np
 from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 
+# --- NEW IMPORTS FOR GRAD-CAM ---
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+
 
 # =====================================================================
 # 1. HELPER FUNCTIONS
@@ -66,7 +70,6 @@ def plot_training_history(history, model_name, output_dir):
     epochs = range(1, len(history['train_loss']) + 1)
     plt.figure(figsize=(12, 5))
 
-    # Loss subplot
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history['train_loss'], label='Train Loss', marker='o')
     plt.plot(epochs, history['val_loss'], label='Val Loss', marker='o')
@@ -76,7 +79,6 @@ def plot_training_history(history, model_name, output_dir):
     plt.legend()
     plt.grid(True, linestyle='--', alpha=0.7)
 
-    # Accuracy subplot
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history['train_acc'], label='Train Acc', marker='o')
     plt.plot(epochs, history['val_acc'], label='Val Acc', marker='o')
@@ -87,7 +89,6 @@ def plot_training_history(history, model_name, output_dir):
     plt.grid(True, linestyle='--', alpha=0.7)
 
     plt.tight_layout()
-    # Route the save to the designated folder
     plt.savefig(os.path.join(output_dir, f'{model_name}_training_history.png'))
     plt.close()
 
@@ -107,7 +108,6 @@ def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-    # --- 1. Generate Confusion Matrix ---
     cm = confusion_matrix(all_labels, all_preds)
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
@@ -121,13 +121,76 @@ def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_
     plt.savefig(os.path.join(output_dir, f'{model_name}_confusion_matrix.png'))
     plt.close()
 
-    # --- 2. Calculate Precision, Recall, F1 ---
-    # We use average='weighted' to account for any slight imbalances in your cat breed datasets
     precision, recall, f1, _ = precision_recall_fscore_support(
         all_labels, all_preds, average='weighted', zero_division=0
     )
 
     return precision, recall, f1
+
+
+# --- NEW GRAD-CAM HELPER FUNCTIONS ---
+def get_target_layer(model, model_name):
+    """Automatically finds the correct final CNN layer based on the timm architecture."""
+    if 'resnet' in model_name:
+        return [model.layer4[-1]]
+    elif 'efficientnet' in model_name:
+        return [model.conv_head]
+    elif 'convnext' in model_name:
+        return [model.stages[-1].blocks[-1]]
+    else:
+        # Fallback
+        return [list(model.children())[-2]]
+
+
+def generate_gradcam_samples(model, dataloader, device, class_names, model_name, output_dir, num_samples=5):
+    print(f"Generating Explainability (Grad-CAM) Visualizations...")
+    model.eval()
+    target_layers = get_target_layer(model, model_name)
+
+    # Initialize the CAM object
+    # use_cuda must be boolean, checking if device is cuda
+    cam = GradCAM(model=model, target_layers=target_layers, use_cuda=(device.type == 'cuda'))
+
+    # Get a single batch of validation images
+    images, labels = next(iter(dataloader))
+    images, labels = images[:num_samples].to(device), labels[:num_samples]
+
+    fig, axes = plt.subplots(num_samples, 2, figsize=(10, 4 * num_samples))
+
+    for i in range(num_samples):
+        input_tensor = images[i].unsqueeze(0)
+        true_label_idx = labels[i].item()
+
+        # Generate the CAM mask (returns a NumPy array)
+        # targets=None automatically uses the highest scoring category
+        grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0, :]
+
+        # Un-normalize the image so we can display it correctly
+        img_show = images[i].cpu().numpy().transpose((1, 2, 0))
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        img_show = std * img_show + mean
+        img_show = np.clip(img_show, 0, 1)
+
+        # Overlay the heatmap on the image
+        visualization = show_cam_on_image(img_show, grayscale_cam, use_rgb=True)
+
+        # Plot Original
+        axes[i, 0].imshow(img_show)
+        axes[i, 0].set_title(f"True: {class_names[true_label_idx]}")
+        axes[i, 0].axis('off')
+
+        # Plot Grad-CAM
+        with torch.no_grad():
+            pred_idx = model(input_tensor).argmax(dim=1).item()
+
+        axes[i, 1].imshow(visualization)
+        axes[i, 1].set_title(f"Grad-CAM (Pred: {class_names[pred_idx]})")
+        axes[i, 1].axis('off')
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f'{model_name}_gradcam_samples.png'))
+    plt.close()
 
 
 # =====================================================================
@@ -138,13 +201,12 @@ def main():
     DATA_DIR = "images/structured"
     NUM_CLASSES = 12
     BATCH_SIZE = 32
-    EPOCHS = 2
+    EPOCHS = 10
     LEARNING_RATE = 1e-4
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     MODEL_NAME = 'efficientnet_b0'
 
     # --- Create Directory Structure ---
-    # Creates a folder like "efficientnet_b0_10" in your current working directory
     OUTPUT_DIR = f"{MODEL_NAME}_{EPOCHS}"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -190,7 +252,7 @@ def main():
     best_val_loss = float('inf')
     best_epoch = 0
     history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
-    epoch_times = []  # List to track seconds per epoch
+    epoch_times = []
 
     # --- Training Loop ---
     for epoch in range(EPOCHS):
@@ -201,11 +263,9 @@ def main():
 
         scheduler.step()
 
-        # Track Time
         epoch_duration = time.time() - start_time
         epoch_times.append(epoch_duration)
 
-        # Record history
         history['train_loss'].append(train_loss)
         history['train_acc'].append(train_acc)
         history['val_loss'].append(val_loss)
@@ -220,30 +280,32 @@ def main():
             best_val_loss = val_loss
             best_epoch = epoch + 1
 
-            # Save the model directly into our new dynamic folder
             save_path = os.path.join(OUTPUT_DIR, f"best_{MODEL_NAME}.pth")
             torch.save(model.state_dict(), save_path)
             print(f" *** Saved new best model to {OUTPUT_DIR}! ***")
 
     # =====================================================================
-    # 3. FINAL REPORTING, EXPORT, & METRICS TEXT FILE
+    # 3. FINAL REPORTING, EXPORT, & METRICS
     # =====================================================================
     print("\n" + "=" * 50)
     print("TRAINING COMPLETE - EXPORTING RESULTS")
     print("=" * 50)
 
-    # 1. Generate Training Graph in folder
+    # 1. Generate Training Graph
     plot_training_history(history, MODEL_NAME, OUTPUT_DIR)
 
-    # 2. Generate Confusion Matrix & Extended Metrics (Using best saved weights)
+    # 2. Load best weights for final evaluations
     model.load_state_dict(torch.load(save_path))
+
+    # 3. Generate Confusion Matrix & Extended Metrics
     precision, recall, f1 = evaluate_and_generate_metrics(model, val_loader, DEVICE, CLASS_NAMES, MODEL_NAME,
                                                           OUTPUT_DIR)
 
-    # 3. Calculate Time Average
-    avg_sec_per_epoch = sum(epoch_times) / len(epoch_times)
+    # 4. Generate Grad-CAM Explainability Samples
+    generate_gradcam_samples(model, val_loader, DEVICE, CLASS_NAMES, MODEL_NAME, OUTPUT_DIR, num_samples=5)
 
-    # 4. Generate the structured metrics .txt file
+    # 5. Calculate Time Average & Save TXT File
+    avg_sec_per_epoch = sum(epoch_times) / len(epoch_times)
     txt_file_path = os.path.join(OUTPUT_DIR, f"{MODEL_NAME}_metrics.txt")
     with open(txt_file_path, "w") as text_file:
         text_file.write(f"--- Experiment Details ---\n")
