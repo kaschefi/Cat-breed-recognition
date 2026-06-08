@@ -6,6 +6,7 @@ from PIL import Image
 import timm
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
@@ -119,4 +120,7 @@ def predict_and_explain():
 
 
 if __name__ == "__main__":
+    startTime = time.time()
     predict_and_explain()
+    endTime = time.time()
+    print(f"Total execution time: {endTime - startTime:.2f} seconds")

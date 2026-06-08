@@ -18,9 +18,8 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
 
-# =====================================================================
-# 1. HELPER FUNCTIONS
-# =====================================================================
+# HELPER FUNCTIONS
+
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
     running_loss = 0.0
@@ -128,7 +127,7 @@ def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_
     return precision, recall, f1
 
 
-# --- NEW GRAD-CAM HELPER FUNCTIONS ---
+# GRAD-CAM HELPER FUNCTIONS
 def get_target_layer(model, model_name):
     """Automatically finds the correct final CNN layer based on the timm architecture."""
     if 'resnet' in model_name:
@@ -192,10 +191,6 @@ def generate_gradcam_samples(model, dataloader, device, class_names, model_name,
     plt.savefig(os.path.join(output_dir, f'{model_name}_gradcam_samples.png'))
     plt.close()
 
-
-# =====================================================================
-# 2. MAIN EXECUTION FUNCTION
-# =====================================================================
 def main():
     # --- Configuration ---
     DATA_DIR = "images/structured"
@@ -284,27 +279,25 @@ def main():
             torch.save(model.state_dict(), save_path)
             print(f" *** Saved new best model to {OUTPUT_DIR}! ***")
 
-    # =====================================================================
-    # 3. FINAL REPORTING, EXPORT, & METRICS
-    # =====================================================================
+    # FINAL REPORTING, EXPORT, & METRICS
     print("\n" + "=" * 50)
     print("TRAINING COMPLETE - EXPORTING RESULTS")
     print("=" * 50)
 
-    # 1. Generate Training Graph
+    # Generate Training Graph
     plot_training_history(history, MODEL_NAME, OUTPUT_DIR)
 
-    # 2. Load best weights for final evaluations
+    # Load best weights for final evaluations
     model.load_state_dict(torch.load(save_path))
 
-    # 3. Generate Confusion Matrix & Extended Metrics
+    # Generate Confusion Matrix & Extended Metrics
     precision, recall, f1 = evaluate_and_generate_metrics(model, val_loader, DEVICE, CLASS_NAMES, MODEL_NAME,
                                                           OUTPUT_DIR)
 
-    # 4. Generate Grad-CAM Explainability Samples
+    # Generate Grad-CAM Explainability Samples
     generate_gradcam_samples(model, val_loader, DEVICE, CLASS_NAMES, MODEL_NAME, OUTPUT_DIR, num_samples=5)
 
-    # 5. Calculate Time Average & Save TXT File
+    # Calculate Time Average & Save TXT File
     avg_sec_per_epoch = sum(epoch_times) / len(epoch_times)
     txt_file_path = os.path.join(OUTPUT_DIR, f"{MODEL_NAME}_metrics.txt")
     with open(txt_file_path, "w") as text_file:
