@@ -5,11 +5,14 @@ from torchvision import transforms
 from PIL import Image
 import timm
 import matplotlib.pyplot as plt
+import numpy as np
 
-# 1. CONFIGURATION
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+
 IMAGE_PATH = "img.png"
-MODEL_WEIGHTS = "best_efficientnet_b0.pth"
-MODEL_NAME = "efficientnet_b0"
+MODEL_WEIGHTS = "best_convnext_tiny.pth"
+MODEL_NAME = "convnext_tiny"
 NUM_CLASSES = 12
 
 CLASS_NAMES = [
@@ -30,16 +33,25 @@ CLASS_NAMES = [
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def predict_image():
+def get_target_layer(model, model_name):
+    """Automatically finds the correct final CNN layer for Grad-CAM."""
+    if 'resnet' in model_name:
+        return [model.layer4[-1]]
+    elif 'efficientnet' in model_name:
+        return [model.conv_head]
+    elif 'convnext' in model_name:
+        return [model.stages[-1].blocks[-1]]
+    else:
+        return [list(model.children())[-2]]
+
+
+def predict_and_explain():
     print(f"Loading {MODEL_NAME} onto {DEVICE}...")
 
-    # MODEL SETUP
-    # We set pretrained=False because we are loading custom trained weights,
     model = timm.create_model(MODEL_NAME, pretrained=False, num_classes=NUM_CLASSES)
-
     model.load_state_dict(torch.load(MODEL_WEIGHTS, map_location=DEVICE))
     model = model.to(DEVICE)
-    model.eval()  # Set to evaluation mode (turns off dropout)
+    model.eval()
 
     IMG_SIZE = 288 if MODEL_NAME == 'efficientnet_b2' else 224
 
@@ -50,22 +62,16 @@ def predict_image():
     ])
 
     if not os.path.exists(IMAGE_PATH):
-        print(f"Error: Could not find image at {IMAGE_PATH}")
+        print(f"Error: Could not find image at '{IMAGE_PATH}'. Please check the path.")
         return
 
-    # Load image and add a "batch" dimension (from [3, 224, 224] to [1, 3, 224, 224])
-    image = Image.open(IMAGE_PATH).convert('RGB')
-    input_tensor = transform(image).unsqueeze(0).to(DEVICE)
-
+    original_image = Image.open(IMAGE_PATH).convert('RGB')
+    input_tensor = transform(original_image).unsqueeze(0).to(DEVICE)
 
     print(f"Analyzing image...")
     with torch.no_grad():
         output = model(input_tensor)
-
-        # Convert raw output to percentages (probabilities)
         probabilities = F.softmax(output[0], dim=0)
-
-        # Get the top prediction
         confidence, predicted_idx = torch.max(probabilities, 0)
 
     predicted_breed = CLASS_NAMES[predicted_idx.item()]
@@ -77,11 +83,40 @@ def predict_image():
     print(f"Confidence: {confidence_pct:.2f}%")
     print("=" * 40)
 
-    plt.imshow(image)
-    plt.title(f"Predicted: {predicted_breed} ({confidence_pct:.1f}%)")
-    plt.axis('off')
+    print("Generating Grad-CAM visualization...")
+    target_layers = get_target_layer(model, MODEL_NAME)
+
+    # Initialize Grad-CAM
+    cam = GradCAM(model=model, target_layers=target_layers)
+
+    # Generate the heatmap
+    grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0, :]
+
+    # Un-normalize the image so it looks normal when we overlay the heatmap
+    img_show = input_tensor[0].cpu().numpy().transpose((1, 2, 0))
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    img_show = std * img_show + mean
+    img_show = np.clip(img_show, 0, 1)
+
+    # Create the overlay
+    visualization = show_cam_on_image(img_show, grayscale_cam, use_rgb=True)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+
+    # Plot Original Image
+    axes[0].imshow(img_show)
+    axes[0].set_title("Original Input")
+    axes[0].axis('off')
+
+    # Plot Grad-CAM Image
+    axes[1].imshow(visualization)
+    axes[1].set_title(f"Prediction: {predicted_breed} ({confidence_pct:.1f}%)")
+    axes[1].axis('off')
+
+    plt.tight_layout()
     plt.show()
 
 
 if __name__ == "__main__":
-    predict_image()
+    predict_and_explain()
