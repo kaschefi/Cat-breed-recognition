@@ -201,13 +201,13 @@ def main():
     DATA_DIR = "images/structured"
     NUM_CLASSES = 12
     BATCH_SIZE = 32
-    EPOCHS = 5
+    EPOCHS = 8
     LEARNING_RATE = 1e-4
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    MODEL_NAME = 'efficientnet_b2'
+    MODEL_NAME = 'resnet50'
 
     # --- Create Directory Structure ---
-    OUTPUT_DIR = f"{MODEL_NAME}_{EPOCHS}"
+    OUTPUT_DIR = f"{MODEL_NAME}_{EPOCHS}_best_model"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     print(f"Using device: {DEVICE}")
@@ -218,12 +218,17 @@ def main():
     IMG_SIZE = 288 if MODEL_NAME == 'efficientnet_b2' else 224
 
     train_transform = transforms.Compose([
-        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        transforms.RandomResizedCrop(
+            IMG_SIZE,
+            scale=(0.8, 1.0)
+        ),
         transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(15),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2),
+        transforms.RandomRotation(20),
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        transforms.RandomErasing(p=0.2)
     ])
     val_transform = transforms.Compose([
         transforms.Resize((IMG_SIZE, IMG_SIZE)),
@@ -240,11 +245,11 @@ def main():
     CLASS_NAMES = train_dataset.classes
 
     # --- Model Setup ---
-    model = timm.create_model(MODEL_NAME, pretrained=True, num_classes=NUM_CLASSES)
+    model = timm.create_model(MODEL_NAME, pretrained=True, num_classes=NUM_CLASSES,drop_rate=0.4,drop_path_rate=0.2)
     model = model.to(DEVICE)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-2)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=5e-2)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
 
     # --- Metrics Tracking Setup ---

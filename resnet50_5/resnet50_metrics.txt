@@ -1,0 +1,16 @@
+--- Experiment Details ---
+Model Architecture: resnet50
+Total Epochs Run: 5
+Best Weights Achieved at Epoch: 5
+
+--- Core Validation Metrics ---
+Validation Accuracy: 90.00%
+Validation Loss: 0.7911
+
+--- Advanced Classification Metrics (Weighted) ---
+F1 Score: 0.8993
+Precision: 0.9023
+Recall: 0.9000
+
+--- Performance Metrics ---
+Average sec/epoch: 149.84 seconds
