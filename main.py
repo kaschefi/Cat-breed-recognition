@@ -1,3 +1,5 @@
+# configurations for baseline
+
 import os
 import time
 import torch
@@ -13,13 +15,13 @@ import seaborn as sns
 import numpy as np
 from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 
-# --- NEW IMPORTS FOR GRAD-CAM ---
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
 
 # HELPER FUNCTIONS
 
+# trains the model for a single epoch und returns precision and lose
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
     running_loss = 0.0
@@ -43,7 +45,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
 
     return running_loss / total, (correct / total) * 100
 
-
+# test the model by using our test data set, no training
 def validate(model, dataloader, criterion, device):
     model.eval()
     running_loss = 0.0
@@ -63,12 +65,13 @@ def validate(model, dataloader, criterion, device):
 
     return running_loss / total, (correct / total) * 100
 
-
+# generates and saves two graphs for lose and lose
 def plot_training_history(history, model_name, output_dir):
     print(f"Generating training history graphs...")
     epochs = range(1, len(history['train_loss']) + 1)
     plt.figure(figsize=(12, 5))
 
+    # Left Diagram: Training -and Validation lose
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history['train_loss'], label='Train Loss', marker='o')
     plt.plot(epochs, history['val_loss'], label='Val Loss', marker='o')
@@ -78,6 +81,7 @@ def plot_training_history(history, model_name, output_dir):
     plt.legend()
     plt.grid(True, linestyle='--', alpha=0.7)
 
+    # Right Diagram: Training -and Validation lose
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history['train_acc'], label='Train Acc', marker='o')
     plt.plot(epochs, history['val_acc'], label='Val Acc', marker='o')
@@ -91,7 +95,7 @@ def plot_training_history(history, model_name, output_dir):
     plt.savefig(os.path.join(output_dir, f'{model_name}_training_history.png'))
     plt.close()
 
-
+# Generates a confusion matrix and calculates Precision, Recall and F1-Score
 def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_name, output_dir):
     print(f"Generating confusion matrix and advanced metrics...")
     model.eval()
@@ -127,7 +131,7 @@ def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_
     return precision, recall, f1
 
 
-# GRAD-CAM HELPER FUNCTIONS
+# Returns the right layer depending on model for Grad-Cam
 def get_target_layer(model, model_name):
     """Automatically finds the correct final CNN layer based on the timm architecture."""
     if 'resnet' in model_name:
@@ -140,7 +144,7 @@ def get_target_layer(model, model_name):
         # Fallback
         return [list(model.children())[-2]]
 
-
+# Generates Grad-Cam for visualization
 def generate_gradcam_samples(model, dataloader, device, class_names, model_name, output_dir, num_samples=5):
     print(f"Generating Explainability (Grad-CAM) Visualizations...")
     model.eval()
@@ -191,8 +195,13 @@ def generate_gradcam_samples(model, dataloader, device, class_names, model_name,
     plt.savefig(os.path.join(output_dir, f'{model_name}_gradcam_samples.png'))
     plt.close()
 
+
+# MAIN FUNCTION
+
+
 def main():
-    # --- Configuration ---
+    # Configuration
+    # Set to your dataset path
     DATA_DIR = "images/structured"
     NUM_CLASSES = 12
     BATCH_SIZE = 32
@@ -201,7 +210,7 @@ def main():
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     MODEL_NAME = 'efficientnet_b2'
 
-    # --- Create Directory Structure ---
+    # Create Directory Structure
     OUTPUT_DIR = f"{MODEL_NAME}_{EPOCHS}"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -209,7 +218,7 @@ def main():
     print(f"Selected model architecture: {MODEL_NAME}")
     print(f"All outputs will be saved to: folder '{OUTPUT_DIR}/'")
 
-    # --- Data Loading ---
+    # Data Loading
     IMG_SIZE = 288 if MODEL_NAME == 'efficientnet_b2' else 224
 
     train_transform = transforms.Compose([
@@ -234,7 +243,7 @@ def main():
 
     CLASS_NAMES = train_dataset.classes
 
-    # --- Model Setup ---
+    # Model Setup
     model = timm.create_model(MODEL_NAME, pretrained=True, num_classes=NUM_CLASSES)
     model = model.to(DEVICE)
 
@@ -242,14 +251,14 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-2)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
 
-    # --- Metrics Tracking Setup ---
+    # Metrics Tracking Setup
     best_val_acc = 0.0
     best_val_loss = float('inf')
     best_epoch = 0
     history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
     epoch_times = []
 
-    # --- Training Loop ---
+    # Training Loop
     for epoch in range(EPOCHS):
         start_time = time.time()
 
@@ -279,7 +288,9 @@ def main():
             torch.save(model.state_dict(), save_path)
             print(f" *** Saved new best model to {OUTPUT_DIR}! ***")
 
+
     # FINAL REPORTING, EXPORT, & METRICS
+
     print("\n" + "=" * 50)
     print("TRAINING COMPLETE - EXPORTING RESULTS")
     print("=" * 50)

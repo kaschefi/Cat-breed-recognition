@@ -1,3 +1,5 @@
+# configurations for our best model
+
 import os
 import time
 import torch
@@ -16,9 +18,9 @@ from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
-# =====================================================================
 # HELPER FUNCTIONS
-# =====================================================================
+
+# trains the model for a single epoch und returns precision and lose
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
     running_loss = 0.0
@@ -42,7 +44,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
 
     return running_loss / total, (correct / total) * 100
 
-
+# test the model by using our test data set, no training
 def validate(model, dataloader, criterion, device):
     model.eval()
     running_loss = 0.0
@@ -62,12 +64,13 @@ def validate(model, dataloader, criterion, device):
 
     return running_loss / total, (correct / total) * 100
 
-
+# generates and saves two graphs for lose and lose
 def plot_training_history(history, model_name, output_dir):
     print(f"Generating training history graphs...")
     epochs = range(1, len(history['train_loss']) + 1)
     plt.figure(figsize=(12, 5))
 
+    # Left Diagram: Training -and Validation lose
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history['train_loss'], label='Train Loss', marker='o')
     plt.plot(epochs, history['val_loss'], label='Val Loss', marker='o')
@@ -77,6 +80,7 @@ def plot_training_history(history, model_name, output_dir):
     plt.legend()
     plt.grid(True, linestyle='--', alpha=0.7)
 
+    # Right Diagram: Training -and Validation lose
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history['train_acc'], label='Train Acc', marker='o')
     plt.plot(epochs, history['val_acc'], label='Val Acc', marker='o')
@@ -90,7 +94,7 @@ def plot_training_history(history, model_name, output_dir):
     plt.savefig(os.path.join(output_dir, f'{model_name}_training_history.png'))
     plt.close()
 
-
+# Generates a confusion matrix and calculates Precision, Recall and F1-Score
 def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_name, output_dir):
     print(f"Generating confusion matrix and advanced metrics...")
     model.eval()
@@ -125,7 +129,7 @@ def evaluate_and_generate_metrics(model, dataloader, device, class_names, model_
 
     return precision, recall, f1
 
-
+# Returns the right layer depending on model for Grad-Cam
 def get_target_layer(model, model_name):
     if 'resnet' in model_name:
         return [model.layer4[-1]]
@@ -136,14 +140,17 @@ def get_target_layer(model, model_name):
     else:
         return [list(model.children())[-2]]
 
-
+# Generates Grad-Cam for visualization
 def generate_gradcam_samples(model, dataloader, device, class_names, model_name, output_dir, num_samples=5):
     print(f"Generating Explainability (Grad-CAM) Visualizations...")
     model.eval()
     target_layers = get_target_layer(model, model_name)
 
+    # Initialize the CAM object
+    # use_cuda must be boolean, checking if device is cuda
     cam = GradCAM(model=model, target_layers=target_layers)
 
+    # Get a single batch of validation images
     images, labels = next(iter(dataloader))
     images, labels = images[:num_samples].to(device), labels[:num_samples]
 
@@ -153,20 +160,26 @@ def generate_gradcam_samples(model, dataloader, device, class_names, model_name,
         input_tensor = images[i].unsqueeze(0)
         true_label_idx = labels[i].item()
 
+        # Generate the CAM mask (returns a NumPy array)
+        # targets=None automatically uses the highest scoring category
         grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0, :]
 
+        # Un-normalize the image so we can display it correctly
         img_show = images[i].cpu().numpy().transpose((1, 2, 0))
         mean = np.array([0.485, 0.456, 0.406])
         std = np.array([0.229, 0.224, 0.225])
         img_show = std * img_show + mean
         img_show = np.clip(img_show, 0, 1)
 
+        # Overlay the heatmap on the image
         visualization = show_cam_on_image(img_show, grayscale_cam, use_rgb=True)
 
+        # Plot Original
         axes[i, 0].imshow(img_show)
         axes[i, 0].set_title(f"True: {class_names[true_label_idx]}")
         axes[i, 0].axis('off')
 
+        # Plot Grad-CAM
         with torch.no_grad():
             pred_idx = model(input_tensor).argmax(dim=1).item()
 
@@ -179,33 +192,34 @@ def generate_gradcam_samples(model, dataloader, device, class_names, model_name,
     plt.close()
 
 
-# =====================================================================
-# 2. MAIN EXECUTION FUNCTION
-# =====================================================================
-def main():
-    # --- Configuration ---
-    # Set to your specific Google Drive dataset path
-    DATA_DIR = "/content/drive/MyDrive/structured"
 
-    # Define where you want the output folders saved in your Google Drive
+# MAIN FUNCTION
+
+
+def main():
+    # Configuration
+    # Set to your dataset path
+    DATA_DIR = "images/structured"
+
+    # Define where you want the output folders saved in your Google Drive / Not relevant unless you want a specific path
     BASE_SAVE_DIR = "/content/drive/MyDrive/Cat_Project_Results"
 
     NUM_CLASSES = 12
     BATCH_SIZE = 32
-    EPOCHS = 20
+    EPOCHS = 7
     LEARNING_RATE = 1e-4
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     MODEL_NAME = 'convnext_tiny'
 
-    # --- Create Directory Structure in Google Drive ---
-    OUTPUT_DIR = os.path.join(BASE_SAVE_DIR, f"{MODEL_NAME}_{EPOCHS}_dropRate0.4_Augmentation_lr_label_smoothing=0.2")
+    # Create Directory Structure
+    OUTPUT_DIR = f"{MODEL_NAME}_{EPOCHS}"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     print(f"Using device: {DEVICE}")
     print(f"Selected model architecture: {MODEL_NAME}")
     print(f"All outputs will be saved permanently to: '{OUTPUT_DIR}/'")
 
-    # --- Data Loading ---
+    # Data Loading and augmentation
     IMG_SIZE = 288 if MODEL_NAME == 'efficientnet_b2' else 224
 
     train_transform = transforms.Compose([
@@ -233,7 +247,7 @@ def main():
 
     CLASS_NAMES = train_dataset.classes
 
-    # --- Model Setup ---
+    # Model Setup
     model = timm.create_model(MODEL_NAME, pretrained=True, num_classes=NUM_CLASSES,drop_rate=0.4,drop_path_rate=0.2)
     model = model.to(DEVICE)
 
@@ -241,14 +255,14 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=5e-2)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
 
-    # --- Metrics Tracking Setup ---
+    # Metrics Tracking Setup
     best_val_acc = 0.0
     best_val_loss = float('inf')
     best_epoch = 0
     history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
     epoch_times = []
 
-    # --- Training Loop ---
+    # Training Loop
     for epoch in range(EPOCHS):
         start_time = time.time()
 
@@ -278,9 +292,9 @@ def main():
             torch.save(model.state_dict(), save_path)
             print(f" *** Saved new best model to Google Drive! ***")
 
-    # =====================================================================
-    #  FINAL REPORTING, EXPORT, & METRICS
-    # =====================================================================
+
+    # FINAL REPORTING, EXPORT, & METRICS
+
     print("\n" + "=" * 50)
     print("TRAINING COMPLETE - EXPORTING RESULTS")
     print("=" * 50)
