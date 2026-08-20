@@ -4,11 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fa90122-6f76-40ac-9ea3-4af99c32c23c" name="Changes" comment="" />
+    <list default="true" id="7fa90122-6f76-40ac-9ea3-4af99c32c23c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/Cat-breed-recognition.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cat-breed-recognition.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/predict.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="9829" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -22,13 +32,79 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/kaschefi/Cat-breed-recognition.git&quot;,
-    &quot;accountId&quot;: &quot;deb9db00-c1ee-41c3-b5dc-be9b053cbac5&quot;
+    &quot;accountId&quot;: &quot;8a8a9245-64de-4283-b4ff-673ffd8f1332&quot;
   }
 }</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.5396141182522136" />
+      <entry key="MS500" value="1.8839275310636712" />
+      <entry key="S2" value="1.9696268711248637" />
+      <entry key="S5" value="1.9933288724520102" />
+      <entry key="S10" value="2.097439512789811" />
+      <entry key="S30" value="2.739924518125938" />
+      <entry key="S60" value="3.216419213032091" />
+      <entry key="M2" value="3.5596662245920103" />
+      <entry key="M5" value="3.8106016841639243" />
+      <entry key="M10" value="3.902939765576646" />
+      <entry key="M15" value="3.934756746050489" />
+      <entry key="M30" value="3.967107158648483" />
+      <entry key="H1" value="3.983485207515588" />
+      <entry key="H2" value="3.9917254392555463" />
+      <entry key="H4" value="3.995858419525539" />
+      <entry key="D1" value="3.9993091385877246" />
+      <entry key="W1" value="3.999901290857672" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="2.1324026966094202E-252" />
+      <entry key="S10" value="1.4602748702245819E-126" />
+      <entry key="S30" value="1.1345183826657215E-42" />
+      <entry key="S60" value="1.0651377294348939E-21" />
+      <entry key="M2" value="3.263644786791133E-11" />
+      <entry key="M5" value="6.389710084918011E-5" />
+      <entry key="M10" value="0.0079935662159752" />
+      <entry key="M15" value="0.03997855117766879" />
+      <entry key="M30" value="0.1999463707539319" />
+      <entry key="H1" value="0.44715363216005743" />
+      <entry key="H2" value="0.6686954704198745" />
+      <entry key="H4" value="0.8177380206520143" />
+      <entry key="D1" value="0.9670205391926082" />
+      <entry key="W1" value="0.9952206655912674" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.709111137197291" />
+      <entry key="MS500" value="1.4915145913506538" />
+      <entry key="S2" value="1.8492558711739895" />
+      <entry key="S5" value="1.9430296619843093" />
+      <entry key="S10" value="2.0714211298411334" />
+      <entry key="S30" value="2.7300263437243486" />
+      <entry key="S60" value="3.211026457221145" />
+      <entry key="M2" value="3.5568100569579495" />
+      <entry key="M5" value="3.8094757156641177" />
+      <entry key="M10" value="3.9102904950494497" />
+      <entry key="M15" value="3.9741989897288152" />
+      <entry key="M30" value="4.166519651324178" />
+      <entry key="H1" value="4.430166992965195" />
+      <entry key="H2" value="4.660093192841379" />
+      <entry key="H4" value="4.813401705523635" />
+      <entry key="D1" value="4.966292067639936" />
+      <entry key="W1" value="4.99511644447294" />
+    </decayedShown>
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
   <component name="ProjectId" id="3EqhH8yCrQDbCTQnnuXmMYssxht" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -40,9 +116,12 @@
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.oxford_dataset_organisator.executor&quot;: &quot;Run&quot;,
     &quot;Python.predict.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
@@ -69,11 +148,39 @@
       <recent name="C:\Users\stefa\AIDS_Projekt\Cat-breed-recognition\images" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="predict" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="uv (Cat-breed-recognition)" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/predict.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.27397.106" />
-        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-PY-262.9437.214" />
+        <option value="bundled-python-sdk-821f704e66d9-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.9437.214" />
       </set>
     </attachedChunks>
   </component>
@@ -89,6 +196,9 @@
       <workItem from="1780931379438" duration="3048000" />
       <workItem from="1781096795445" duration="6827000" />
       <workItem from="1781117059941" duration="3848000" />
+      <workItem from="1781167920675" duration="3112000" />
+      <workItem from="1781365641809" duration="6000" />
+      <workItem from="1787234369057" duration="847000" />
     </task>
     <servers />
   </component>
@@ -96,9 +206,9 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Cat_breed_recognition$oxford_dataset_organisator.coverage" NAME="oxford_dataset_organisator Coverage Results" MODIFIED="1780918879297" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Cat_breed_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1780929166518" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Cat_breed_recognition$convnext_tiny.coverage" NAME="convnext_tiny Coverage Results" MODIFIED="1781097643605" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Cat_breed_recognition$predict.coverage" NAME="predict Coverage Results" MODIFIED="1781100985026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Cat_breed_recognition$oxford_dataset_organisator.coverage" NAME="oxford_dataset_organisator Coverage Results" MODIFIED="1780918879297" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Cat_breed_recognition$predict.coverage" NAME="predict Coverage Results" MODIFIED="1781173471683" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Cat_breed_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1780929166518" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

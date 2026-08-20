@@ -14,6 +14,8 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 IMAGE_PATH = "img.png"
 MODEL_WEIGHTS = "best_convnext_tiny.pth"
 MODEL_NAME = "convnext_tiny"
+#MODEL_WEIGHTS = "best_resnet50.pth"
+#MODEL_NAME = "resnet50"
 NUM_CLASSES = 12
 
 CLASS_NAMES = [
